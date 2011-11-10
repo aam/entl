@@ -1,0 +1,7 @@
+@author Alexander Aprelev <alexander.aprelev@db.com>
+@title Entitlements demonstration application.
+@doc	Demonstrates Erlang/OTP architecture.
+		Server application consists of multiple "permanent" workers, that are restarted on failure.
+		Test client creates flow of requests and measures response time.
+@end
+@since Nov 6, 2011
