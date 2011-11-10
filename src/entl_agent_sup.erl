@@ -1,3 +1,6 @@
+%% @author Alexander Aprelev <alexander.aprelev@db.com>
+%% @since Nov 6, 2011
+
 -module(entl_agent_sup).
 
 -behaviour(supervisor).

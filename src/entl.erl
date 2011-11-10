@@ -1,6 +1,5 @@
-%% Author: apreleal
-%% Created: Nov 4, 2011
-%% Description: TODO: Add description to entl
+%% @author Alexander Aprelev <alexander.aprelev@db.com>
+%% @since Nov 6, 2011
 -module(entl).
 
 %%
@@ -27,6 +26,9 @@ start(NAgents) ->
 		lists:seq(1, NAgents)
 	).
 
+%%
+%% @spec handle_request(Permission::any(), Handler:: fun(any()) ) -> ok
+%%
 handle_request(R, Handler) ->
 	ID = entl_db:place_request(R, Handler),
 	

@@ -1,3 +1,5 @@
+%% @author Alexander Aprelev <alexander.aprelev@db.com>
+%% @since Nov 6, 2011
 -module(entl_test).
 
 -export([init/0, localtest/0, remotetest/1, test/2]).
@@ -10,14 +12,14 @@ init() ->
 	entl:init(),
 	entl_db:create_db(),
 
-	entl:start(?NAGENTS).
+	entl:start(?NAGENTS),
+	entl_db:create_db().
+	
 
 localtest() -> test(node(), ?NSAMPLES).
 remotetest(Node) -> test(Node, ?NSAMPLES).
 
 test(ServerNode, NSAMPLES) ->
-	entl_db:create_db(),
-	
 	First = now(),
 	ParentPID = self(),
 	lists:foldl(

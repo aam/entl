@@ -1,6 +1,9 @@
-%% Author: aam
-%% Created: Nov 6, 2011
-%% Description: TODO: Add description to entl_db
+%% @author Alexander Aprelev <alexander.aprelev@db.com>
+%% @since Nov 6, 2011
+%% @doc Entitlements persistent layer.
+%%		Persists permission requests in mnesia databases. 
+%%		Provides layer of abstraction to accomodate new requests submission, retrieval. 
+%% @end
 -module(entl_db).
 
 %%
@@ -12,11 +15,16 @@
 %% Exported Functions
 %%
 -export([create_db/0]).
--export([add_entl/1, remove_entl/1]).
 -export([place_request/2, take_request/2, done_request/1, revisit_what_is_left_off/1, all_new_requests/0]).
 
 %%
 %% API Functions
+%%
+
+%%
+%%	@doc Creates entitlements and requests database
+%%
+%%	@spec create_db() -> ok
 %%
 create_db() ->
 	case mnesia:delete_table(entl) of
@@ -30,11 +38,11 @@ create_db() ->
 	end,
 	mnesia:create_table(request, [{attributes, record_info(fields, request)}]).
 
-add_entl(E) ->
-	mnesia:transaction(fun() -> mnesia:write(E) end).
-remove_entl(E) ->
-	mnesia:transaction(fun() -> mnesia:delete(E) end).
-
+%%
+%%	@doc Agent calls this method to claim request
+%%
+%%	@spec place_request(Permission::any(), Handler::fun(any())) -> ref()
+%%
 place_request(Permission, Handler) ->
 	Ref = make_ref(),
 	{atomic, ok} =
@@ -46,9 +54,9 @@ place_request(Permission, Handler) ->
 	Ref.
 
 %%
-%%	@spec take_request(ReqId) -> {ok, {failed, already_taken}} | {ok}
-%%	where
-%%		ReqId = ref()
+%%	@doc Agent calls this method to claim request
+%%
+%%	@spec take_request(WorkerPID::pid(), ReqId::ref()) -> {atomic, {failed, already_taken}} | {atomic, ok}
 %%
 take_request(WorkerPID, ReqId) ->
 	mnesia:transaction(
@@ -61,6 +69,11 @@ take_request(WorkerPID, ReqId) ->
 			end
 		end).
 
+%%
+%%	@doc Agent calls this method to indicate that the request was processed
+%%
+%%	@spec done_request(ReqId::ref()) -> {atomic, Request::request}
+%%
 done_request(ReqId) ->
 	mnesia:transaction(
 		fun() ->
@@ -70,6 +83,12 @@ done_request(ReqId) ->
 			Req
 		end).
 
+%%
+%%	@doc Agent calls this method on agent's startup to force rescan of 'taken' requests to make sure that 
+%%		dead agents's requests can be reprocessed.
+%%
+%%	@spec revisit_what_is_left_off(WorkerPID::pid()) -> {atomic, ok}
+%%
 revisit_what_is_left_off(WorkerPID) ->
 	mnesia:transaction(
 		fun() ->
@@ -86,6 +105,11 @@ revisit_what_is_left_off(WorkerPID) ->
 			)
 		end).
 
+%%
+%%	@doc Returns list of 'new' requests
+%%
+%%	@spec all_new_requests() -> list(Request)
+%%
 all_new_requests() ->
 	{atomic, Result} = 
 		mnesia:transaction(
